@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portfolio Tracker</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -72,7 +74,7 @@
   .mono { font-family: 'DM Mono', monospace; }
 
   /* ── Import section ── */
-  .upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 48px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .upload-zone { display: block; border: 2px dashed var(--border); border-radius: 12px; padding: 48px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
   .upload-zone:hover { border-color: var(--accent); background: rgba(108,142,245,0.04); }
   .upload-zone.drag { border-color: var(--accent); background: rgba(108,142,245,0.08); }
   .upload-zone input { display: none; }
@@ -187,7 +189,11 @@
 <aside>
   <div class="logo"><span>◈</span> Portfolio</div>
   <nav>
-    <a class="active" onclick="show('overview')">
+    <a class="active" onclick="show('import')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Accueil
+    </a>
+    <a onclick="show('overview')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Vue d'ensemble
     </a>
@@ -207,10 +213,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
       Projection
     </a>
-    <a onclick="show('import')" style="margin-top: auto">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Importer CSV
-    </a>
   </nav>
 </aside>
 
@@ -218,7 +220,7 @@
 <main>
 
 <!-- ══ OVERVIEW ══ -->
-<section id="overview" class="active">
+<section id="overview">
   <div class="page-header">
     <h1>Vue d'ensemble</h1>
     <p id="overview-date" class="muted"></p>
@@ -349,12 +351,81 @@
 </section>
 
 <!-- ══ IMPORT ══ -->
-<section id="import">
+<section id="import" class="active">
   <div class="page-header">
-    <h1>Importer un CSV</h1>
-    <p>Exporte ton historique depuis Trade Republic → Paramètres → Documents → Exportation de transactions</p>
+    <h1>Bienvenue</h1>
+    <p>Outil de suivi de portefeuille pour investisseurs Trade Republic</p>
   </div>
+
+  <!-- Présentation -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">À quoi ça sert ?</div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:20px">
+      Cet outil analyse ton historique d'investissement Trade Republic et te donne une vue claire de ton portefeuille,
+      sans compte, sans abonnement. Tes données restent dans ton navigateur — rien n'est stocké sur un serveur.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+      <div style="background:var(--surface2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:18px;margin-bottom:6px">📊</div>
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Vue d'ensemble</div>
+        <div style="color:var(--muted);font-size:12px">Valeur, plus-value, TWRR, MWRR, performance par période</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:18px;margin-bottom:6px">🌍</div>
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Répartition</div>
+        <div style="color:var(--muted);font-size:12px">Exposition géographique et sectorielle consolidée, par ETF</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:18px;margin-bottom:6px">📈</div>
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Évolution</div>
+        <div style="color:var(--muted);font-size:12px">Courbe de valorisation, comparaison S&P 500, repères d'achat</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:18px;margin-bottom:6px">🔮</div>
+        <div style="font-weight:500;font-size:13px;margin-bottom:4px">Projection</div>
+        <div style="color:var(--muted);font-size:12px">Simulation de capital à 5, 10, 20 ans selon 3 scénarios</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide export TR -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Comment exporter depuis Trade Republic ?</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">1</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">Ouvre l'application Trade Republic</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Sur mobile ou sur <strong style="color:var(--text)">app.traderepublic.com</strong></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">2</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">Va dans Profil → Relevés</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Icône de profil en haut à droite → section "Relevés"</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">3</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">Exportation de transactions</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Clique sur <strong style="color:var(--text)">"Exportation de transactions"</strong>, sélectionne la période, télécharge le CSV</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="background:var(--accent2);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">4</div>
+        <div>
+          <div style="font-size:13px;font-weight:500">Importe le fichier ci-dessous</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Puis clique sur <strong style="color:var(--text)">"Actualiser données ETF"</strong> pour charger les prix et la répartition (~30s)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zone d'import -->
   <div class="card">
+    <div class="card-title">Importer ton CSV</div>
     <label class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" accept=".csv">
       <div class="upload-icon">↑</div>
@@ -415,7 +486,48 @@
 </div>
 
 <script>
-const API = 'http://localhost:8000/api';
+const _local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API = _local
+  ? `${window.location.protocol}//${window.location.host}/api`
+  : 'https://REMPLACE-PAR-TON-URL.onrender.com/api';
+
+// ── Portfolio state (localStorage) ───────────────────────────────────────────
+// PORT is the source of truth — sent to the backend with every analytics call.
+// ANALYTICS is the cached response from /api/compute.
+const PORT = { transactions: [], prices: {}, metadata: {} };
+let ANALYTICS = null;
+
+function loadPortfolio() {
+  try {
+    const s = localStorage.getItem('portfolio_v1');
+    if (s) Object.assign(PORT, JSON.parse(s));
+  } catch(e) { console.error('loadPortfolio:', e); }
+}
+
+function savePortfolio() {
+  localStorage.setItem('portfolio_v1', JSON.stringify(PORT));
+}
+
+async function postWithPortfolio(endpoint, extra = {}) {
+  const r = await fetch(`${API}/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...PORT, ...extra }),
+  });
+  return r.json();
+}
+
+async function recompute() {
+  if (!PORT.transactions.length) { ANALYTICS = null; return; }
+  ANALYTICS = await postWithPortfolio('compute');
+}
+
+async function refresh() {
+  await recompute();
+  overviewLoaded = positionsLoaded = evolutionLoaded = allocationLoaded = false;
+  _benchData = null; _evolAbsData = null;
+  loadOverview();
+}
 
 // ── Palette ──────────────────────────────────────────────────────────────────
 const PALETTE = [
@@ -491,7 +603,7 @@ function show(id) {
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelectorAll('nav a')[['overview','positions','evolution','allocation','projection','import'].indexOf(id)].classList.add('active');
+  document.querySelectorAll('nav a')[['import','overview','positions','evolution','allocation','projection'].indexOf(id)].classList.add('active');
 
   if (id === 'overview'    && !overviewLoaded)    loadOverview();
   if (id === 'positions'   && !positionsLoaded)   loadPositions();
@@ -509,10 +621,15 @@ let positionsData = [];
 
 // ── Overview ─────────────────────────────────────────────────────────────────
 async function loadOverview() {
-  const [summary, evolution] = await Promise.all([
-    fetch(`${API}/summary`).then(r => r.json()),
-    fetch(`${API}/evolution`).then(r => r.json())
-  ]);
+  if (!ANALYTICS) {
+    document.getElementById('kpi-grid').innerHTML =
+      '<div class="empty" style="text-align:center;padding:40px 0;color:var(--muted)"><p>Importe ton CSV Trade Republic pour commencer.</p></div>';
+    document.getElementById('metrics-grid').innerHTML = '';
+    document.getElementById('perf-content').innerHTML = '';
+    overviewLoaded = true; return;
+  }
+  const summary  = ANALYTICS.summary;
+  const evolution = ANALYTICS.evolution;
 
   document.getElementById('overview-date').textContent =
     'Dernière mise à jour : ' + new Date().toLocaleDateString('fr-FR');
@@ -582,9 +699,9 @@ async function loadOverview() {
 
   overviewLoaded = true;
 
-  // Metrics and performance load independently (non-blocking)
-  fetch(`${API}/metrics`).then(r => r.json()).then(renderMetrics);
-  loadPerformance('ytd');
+  // Metrics and performance come from cached ANALYTICS (no extra fetch)
+  renderMetrics(ANALYTICS.metrics || {});
+  renderPerfContent(ANALYTICS.performance?.ytd, 'ytd');
 }
 
 function renderMetrics(data) {
@@ -617,20 +734,19 @@ function renderMetrics(data) {
   ).join('');
 }
 
-async function loadPerformance(period) {
-  document.querySelectorAll('#perf-tabs .period-tab').forEach(b =>
-    b.classList.toggle('active', b.dataset.period === period)
-  );
+function renderPerfContent(d, period) {
+  if (period) {
+    document.querySelectorAll('#perf-tabs .period-tab').forEach(b =>
+      b.classList.toggle('active', b.dataset.period === period)
+    );
+  }
   const el = document.getElementById('perf-content');
+  if (!el) return;
   el.className = '';
-  el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Chargement…</div>';
-
-  const d = await fetch(`${API}/performance?period=${period}`).then(r => r.json());
-
+  if (!d) { el.innerHTML = ''; return; }
   const hasReturn = d.return_pct != null;
   const pctColor  = hasReturn ? (d.return_pct >= 0 ? 'var(--gain)' : 'var(--loss)') : 'var(--muted)';
   const sign      = hasReturn && d.return_pct >= 0 ? '+' : '';
-
   el.innerHTML = `
     <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-end">
       <div>
@@ -643,13 +759,21 @@ async function loadPerformance(period) {
         <div class="mstat"><span class="mstat-label">Valeur actuelle</span><span class="mstat-value">${fmtEur(d.end_value)}</span></div>
         <div class="mstat"><span class="mstat-label">Investi sur période</span><span class="mstat-value">${fmtEur(d.invested_during)}</span></div>
       </div>
-    </div>
-  `;
+    </div>`;
+}
+
+async function loadPerformance(period) {
+  if (!ANALYTICS) return;
+  // Use cached value if available, otherwise fetch
+  const cached = ANALYTICS.performance?.[period];
+  if (cached) { renderPerfContent(cached, period); return; }
+  const d = await postWithPortfolio(`compute/performance?period=${period}`);
+  renderPerfContent(d, period);
 }
 
 // ── Positions ─────────────────────────────────────────────────────────────────
 async function loadPositions() {
-  positionsData = await fetch(`${API}/positions`).then(r => r.json());
+  positionsData = ANALYTICS?.positions || [];
   const tbody = document.getElementById('positions-tbody');
 
   if (!positionsData.length) {
@@ -681,12 +805,9 @@ let _benchData    = null;   // normalized benchmark data
 let evolBenchMode = false;
 
 async function loadEvolution() {
-  const [total, pos] = await Promise.all([
-    fetch(`${API}/evolution`).then(r => r.json()),
-    positionsData.length ? Promise.resolve(positionsData) : fetch(`${API}/positions`).then(r => r.json())
-  ]);
-  if (!positionsData.length) positionsData = pos;
-  _evolAbsData = total;
+  if (!ANALYTICS) { evolutionLoaded = true; return; }
+  _evolAbsData = ANALYTICS.evolution || [];
+  positionsData = positionsData.length ? positionsData : (ANALYTICS.positions || []);
 
   renderEvolTotalChart();
 
@@ -787,7 +908,7 @@ async function toggleBenchmark() {
   if (evolBenchMode && !_benchData) {
     btn.disabled = true;
     btn.textContent = 'Chargement…';
-    _benchData = await fetch(`${API}/benchmark?period=max`).then(r => r.json());
+    _benchData = await postWithPortfolio(`compute/benchmark?period=max`);
     btn.disabled = false;
     btn.textContent = '← Valeur €';
   } else {
@@ -800,8 +921,7 @@ async function toggleBenchmark() {
 let projChart = null;
 
 async function loadProjection() {
-  const summary = await fetch(`${API}/summary`).then(r => r.json());
-  const current = summary.total_value || 0;
+  const current = ANALYTICS?.summary?.total_value || 0;
   document.getElementById('proj-current').textContent = fmtEur(current);
 
   const monthlyInput = document.getElementById('proj-monthly');
@@ -884,7 +1004,8 @@ function renderProjectionChart(current, monthly, years) {
 async function loadEtfChart(isin, btn) {
   document.querySelectorAll('.etf-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  const data = await fetch(`${API}/evolution/${isin}`).then(r => r.json());
+  const result = await postWithPortfolio(`compute/etf?isin=${isin}`);
+  const data = result.evolution || [];
   const ctx = document.getElementById('chart-evol-etf').getContext('2d');
   if (charts.evolEtf) charts.evolEtf.destroy();
   charts.evolEtf = new Chart(ctx, {
@@ -903,12 +1024,9 @@ async function loadEtfChart(isin, btn) {
 
 // ── Allocation ─────────────────────────────────────────────────────────────────
 async function loadAllocation() {
-  const [geo, sectors] = await Promise.all([
-    fetch(`${API}/geo`).then(r => r.json()),
-    fetch(`${API}/sectors`).then(r => r.json())
-  ]);
-
-  renderDonut('chart-geo', 'legend-geo', geo.slice(0, 15));
+  const geo     = ANALYTICS?.geo     || [];
+  const sectors = ANALYTICS?.sectors || [];
+  renderDonut('chart-geo',    'legend-geo',    geo.slice(0, 15));
   renderDonut('chart-sector', 'legend-sector', sectors.slice(0, 12));
   allocationLoaded = true;
 }
@@ -996,29 +1114,35 @@ async function doImport() {
   form.append('file', file);
 
   try {
-    const res = await fetch(`${API}/import`, { method: 'POST', body: form });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch(`${API}/parse`, { method: 'POST', body: form });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} — ${body.slice(0, 200)}`);
+    }
     const data = await res.json();
 
-    if (data.imported === 0 && data.skipped > 0) {
-      logLine(`ℹ ${data.skipped} transaction(s) déjà présentes — aucune nouveauté.`);
+    if (data.error) { logLine(`✗ ${data.error}`, 'log-err'); return; }
+
+    const existingIds = new Set(PORT.transactions.map(t => t.id));
+    const newTxs = (data.transactions || []).filter(t => !existingIds.has(t.id));
+
+    if (newTxs.length === 0) {
+      logLine(`ℹ ${data.transactions?.length || 0} transaction(s) déjà présentes — aucune nouveauté.`);
     } else {
-      logLine(`✓ ${data.imported} transaction(s) importée(s), ${data.skipped} doublon(s) ignoré(s)`, 'log-ok');
-      if (data.by_isin && data.by_isin.length) {
-        data.by_isin.forEach(([isin, info]) => {
-          const cls = info.asset_class === 'FUND' ? '' : '';
-          logLine(`  + ${info.count}× [${info.asset_class}] ${info.name}`, 'log-ok');
-        });
-      }
-    }
+      PORT.transactions.push(...newTxs);
+      savePortfolio();
 
-    if (data.errors && data.errors.length) {
-      data.errors.forEach(e => logLine(`  ✗ ${e}`, 'log-err'));
-    }
-
-    if (data.imported > 0) {
+      logLine(`✓ ${newTxs.length} transaction(s) importée(s)`, 'log-ok');
+      const byIsin = {};
+      newTxs.forEach(t => {
+        if (!byIsin[t.isin]) byIsin[t.isin] = { name: t.name, asset_class: t.asset_class, count: 0 };
+        byIsin[t.isin].count++;
+      });
+      Object.values(byIsin).forEach(info =>
+        logLine(`  + ${info.count}× [${info.asset_class}] ${info.name}`, 'log-ok')
+      );
       logLine('→ Clique sur "Actualiser données ETF" pour récupérer les prix et la répartition.');
-      overviewLoaded = positionsLoaded = evolutionLoaded = allocationLoaded = false;
+      await refresh();
     }
   } catch(e) {
     logLine('✗ Erreur import : ' + e.message, 'log-err');
@@ -1030,51 +1154,53 @@ async function doEnrich() {
   log.innerHTML = ''; log.classList.add('visible');
   const btn = document.getElementById('btn-enrich');
   btn.disabled = true;
-  logLine('Démarrage de l\'enrichissement ETF et des prix…');
 
-  function classifyLine(line) {
-    if (/\bOK\b/.test(line))                                return 'log-ok';
-    if (/WARN|echoue|ERREUR|non installe/i.test(line))      return 'log-err';
-    if (/Fallback|Termine/i.test(line))                     return '';
-    return '';
+  const fundTxs = PORT.transactions.filter(t => t.asset_class === 'FUND');
+  const seen = new Set();
+  const toEnrich = [];
+  fundTxs.forEach(t => {
+    if (!seen.has(t.isin)) { seen.add(t.isin); toEnrich.push({ isin: t.isin, name: t.name }); }
+  });
+
+  if (!toEnrich.length) {
+    logLine('Aucun ETF trouvé. Importe d\'abord un CSV.', 'log-err');
+    btn.disabled = false; return;
   }
 
-  try {
-    const response = await fetch(`${API}/enrich/stream?force=true`, { method: 'POST' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const since = fundTxs.map(t => t.date).sort()[0] || '2020-01-01';
+  logLine(`Enrichissement de ${toEnrich.length} ETF(s) depuis ${since}…`);
 
-    const reader  = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const events = buffer.split('\n\n');
-      buffer = events.pop();           // keep trailing incomplete chunk
-
-      for (const event of events) {
-        const dataLine = event.split('\n').find(l => l.startsWith('data: '));
-        if (!dataLine) continue;
-        const data = dataLine.slice(6);
-
-        if (data === '[DONE]') {
-          logLine('✓ Enrichissement terminé.', 'log-ok');
-          overviewLoaded = evolutionLoaded = allocationLoaded = false;
-        } else if (data === '[TIMEOUT]') {
-          logLine('⚠ Timeout — opération trop longue.', 'log-err');
-        } else {
-          logLine(data, classifyLine(data));
-        }
-      }
+  for (const { isin, name } of toEnrich) {
+    logLine(`⋯ ${name} (${isin})…`);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 120000); // 120s max par ETF
+    try {
+      const res = await fetch(`${API}/enrich-isin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isin, name, since }),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const data = await res.json();
+      PORT.metadata[isin] = data.metadata;
+      PORT.prices[isin]   = data.prices;
+      const geo = Object.keys(data.metadata?.geo_data || {}).length;
+      const pts = data.prices?.length || 0;
+      logLine(`  ✓ geo: ${geo} pays · ${pts} prix`, 'log-ok');
+    } catch(e) {
+      clearTimeout(timer);
+      const msg = e.name === 'AbortError' ? 'Timeout 120s depasse' : e.message;
+      logLine(`  ✗ ${msg}`, 'log-err');
     }
-  } catch(e) {
-    logLine('✗ Erreur : ' + e.message, 'log-err');
-  } finally {
-    btn.disabled = false;
   }
+
+  savePortfolio();
+  logLine('Calcul des analytics…');
+  await refresh();
+  logLine('✓ Terminé.', 'log-ok');
+  btn.disabled = false;
 }
 
 // ── Allocation Detail Modal ───────────────────────────────────────────────────
@@ -1089,7 +1215,7 @@ async function openAllocDetail(type, name) {
   document.getElementById('alloc-modal-content').innerHTML = '<div class="loading">Chargement…</div>';
   document.getElementById('alloc-modal-overlay').style.display = 'flex';
 
-  const data = await fetch(`${API}/allocation/detail?type=${type}&name=${encodeURIComponent(name)}`).then(r => r.json());
+  const data = await postWithPortfolio(`compute/allocation-detail?type=${type}&name=${encodeURIComponent(name)}`);
 
   if (!data.etfs.length) {
     document.getElementById('alloc-modal-content').innerHTML =
@@ -1172,8 +1298,9 @@ async function openEtfModal(isin) {
 
   document.getElementById('modal-overlay').style.display = 'flex';
 
-  // Fetch transactions once; price history will be fetched per period
-  _modalTxs = await fetch(`${API}/transactions/${isin}`).then(r => r.json());
+  // Transactions come from stored PORT data (no extra fetch needed)
+  _modalTxs = PORT.transactions.filter(t => t.isin === isin && t.type === 'BUY')
+    .map(t => ({ date: t.date, shares: t.shares, price: t.price, amount: t.amount }));
   await loadModalChart('1y');
 }
 
@@ -1187,7 +1314,7 @@ async function loadModalChart(period) {
   const wrap = document.getElementById('modal-chart-wrap');
   wrap.innerHTML = '<div class="loading">Chargement…</div><canvas id="modal-chart"></canvas>';
 
-  const priceData = await fetch(`${API}/price/${_modalIsin}?period=${period}`).then(r => r.json());
+  const priceData = await postWithPortfolio(`compute/price?isin=${_modalIsin}&period=${period}`);
   wrap.querySelector('.loading')?.remove();
 
   if (!priceData.length) {
@@ -1280,7 +1407,12 @@ async function loadModalChart(period) {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-loadOverview();
+loadPortfolio();
+if (PORT.transactions.length) {
+  recompute().then(() => show('overview'));
+} else {
+  show('import');
+}
 </script>
 </body>
 </html>

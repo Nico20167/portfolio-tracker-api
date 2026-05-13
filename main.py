@@ -1,40 +1,38 @@
 """
-main.py — FastAPI entry point.
-Run with: uvicorn main:app --reload --port 8000
+main.py — FastAPI stateless portfolio API.
+
+Each analytics endpoint receives the full portfolio state in the POST body,
+builds a temporary in-memory SQLite from it, runs the existing analytics
+functions unchanged, then discards the DB. No server-side storage.
+
+Deploy:
+  - Backend: Render / Fly.io / Vercel (free tier)
+  - Frontend: GitHub Pages (static, points VITE_API to the backend URL)
 """
 
-from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
-import asyncio
 import io
-import queue as _queue
-import shutil
-import sys
-import tempfile
-import threading
+import json
+import sqlite3
+from contextlib import contextmanager
+from pathlib import Path
 
-from database import init_db
-from parser import parse_and_import
-from enricher import enrich_all
+import pandas as pd
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
+import database
 from analytics import (
-    get_positions,
-    get_summary,
-    get_portfolio_evolution,
-    get_geo_allocation,
-    get_sector_allocation,
-    get_etf_evolution,
-    get_etf_price_history,
-    get_etf_transactions,
-    get_allocation_detail,
-    get_period_performance,
-    get_metrics,
-    get_benchmark_comparison,
+    get_positions, get_summary, get_portfolio_evolution,
+    get_geo_allocation, get_sector_allocation,
+    get_etf_evolution, get_etf_price_history, get_etf_transactions,
+    get_allocation_detail, get_period_performance,
+    get_metrics, get_benchmark_comparison,
 )
 
-app = FastAPI(title="Portfolio Tracker", version="1.0.0")
+app = FastAPI(title="Portfolio Tracker — stateless")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,15 +41,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve frontend
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
-
-
-@app.on_event("startup")
-def startup():
-    init_db()
-    print("[SERVER] Portfolio tracker ready at http://localhost:8000")
 
 
 @app.get("/")
@@ -59,146 +50,262 @@ def root():
     return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 
-# ─── Data import ──────────────────────────────────────────────────────────────
+# ── Portfolio payload model ────────────────────────────────────────────────────
 
-@app.post("/api/import")
-async def import_csv(file: UploadFile = File(...)):
-    """Upload a Trade Republic CSV and import transactions."""
-    if not file.filename.endswith(".csv"):
-        raise HTTPException(400, "Only CSV files are accepted")
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
-        shutil.copyfileobj(file.file, tmp)
-        tmp_path = tmp.name
-
-    result = parse_and_import(tmp_path)
-    return result
+class PortfolioData(BaseModel):
+    transactions: list[dict] = []
+    prices: dict[str, list[dict]] = {}   # {isin: [{date, close}]}
+    metadata: dict[str, dict] = {}       # {isin: {name, geo_data, sector_data}}
 
 
-@app.post("/api/enrich")
-def enrich(force: bool = False):
-    enrich_all(force=force)
-    return {"status": "ok"}
+# ── In-memory SQLite builder ───────────────────────────────────────────────────
+
+def _build_mem_db(p: PortfolioData) -> sqlite3.Connection:
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.executescript("""
+        CREATE TABLE transactions (
+            id TEXT PRIMARY KEY, date TEXT, account_type TEXT, asset_class TEXT,
+            type TEXT, isin TEXT, name TEXT, shares REAL, price REAL,
+            amount REAL, currency TEXT DEFAULT 'EUR'
+        );
+        CREATE TABLE etf_metadata (
+            isin TEXT PRIMARY KEY, name TEXT, ticker TEXT,
+            last_updated TEXT, geo_data TEXT, sector_data TEXT
+        );
+        CREATE TABLE prices (
+            isin TEXT NOT NULL, date TEXT NOT NULL, close REAL NOT NULL,
+            PRIMARY KEY (isin, date)
+        );
+    """)
+    conn.executemany(
+        "INSERT OR IGNORE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        [(t.get("id", ""), t["date"], t.get("account_type", "PEA"),
+          t.get("asset_class", "FUND"), t.get("type", "BUY"),
+          t["isin"], t["name"], t["shares"], t["price"], t["amount"],
+          t.get("currency", "EUR"))
+         for t in p.transactions],
+    )
+    for isin, meta in p.metadata.items():
+        conn.execute(
+            "INSERT OR REPLACE INTO etf_metadata VALUES (?,?,?,?,?,?)",
+            (isin, meta.get("name", isin), "", "2026-01-01",
+             json.dumps(meta.get("geo_data", {})),
+             json.dumps(meta.get("sector_data", {}))),
+        )
+    for isin, rows in p.prices.items():
+        conn.executemany(
+            "INSERT OR REPLACE INTO prices VALUES (?,?,?)",
+            [(isin, r["date"], r["close"]) for r in rows],
+        )
+    return conn
 
 
-@app.post("/api/enrich/stream")
-async def enrich_stream(force: bool = False):
-    """Stream enrichment logs line by line via Server-Sent Events."""
-    log_q: _queue.Queue = _queue.Queue()
-
-    class _LogCapture(io.TextIOBase):
-        def __init__(self, q: _queue.Queue, fallback):
-            self._q = q
-            self._fb = fallback
-            self._buf = ""
-
-        def write(self, s: str) -> int:
-            self._fb.write(s)
-            self._buf += s
-            while "\n" in self._buf:
-                line, self._buf = self._buf.split("\n", 1)
-                if line.strip():
-                    self._q.put(line.strip())
-            return len(s)
-
-        def flush(self):
-            if self._buf.strip():
-                self._q.put(self._buf.strip())
-                self._buf = ""
-            self._fb.flush()
-
-    original_stdout = sys.stdout
-
-    def _run():
-        sys.stdout = _LogCapture(log_q, original_stdout)
+@contextmanager
+def _with_portfolio(p: PortfolioData):
+    """Build in-memory DB, inject it so analytics functions use it transparently."""
+    conn = _build_mem_db(p)
+    with database.inject_conn(conn):
         try:
-            enrich_all(force=force)
-        except Exception as exc:
-            log_q.put(f"[ERREUR] {exc}")
+            yield
         finally:
-            sys.stdout = original_stdout
-            log_q.put(None)  # sentinel
+            conn.close()
 
-    threading.Thread(target=_run, daemon=True).start()
 
-    loop = asyncio.get_event_loop()
+# ── CSV parse (stateless) ──────────────────────────────────────────────────────
 
-    async def _event_gen():
-        while True:
-            try:
-                line = await loop.run_in_executor(None, lambda: log_q.get(timeout=300))
-            except _queue.Empty:
-                yield "data: [TIMEOUT]\n\n"
-                break
-            if line is None:
-                yield "data: [DONE]\n\n"
-                break
-            yield f"data: {line}\n\n"
+@app.post("/api/parse")
+async def parse_csv(file: UploadFile = File(...)):
+    """
+    Parse a Trade Republic CSV (stateless — nothing stored server-side).
+    Handles UTF-8, UTF-8-BOM, UTF-16 and Latin-1 encodings automatically.
+    """
+    content = await file.read()
 
-    return StreamingResponse(
-        _event_gen(),
-        media_type="text/event-stream",
-        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    # ── Try multiple encodings ────────────────────────────────────────────────
+    df = None
+    last_err = ""
+    for enc in ("utf-8-sig", "utf-8", "utf-16", "latin-1"):
+        try:
+            df = pd.read_csv(io.BytesIO(content), encoding=enc)
+            break
+        except Exception as e:
+            last_err = str(e)
+
+    if df is None:
+        return {"error": f"Impossible de lire le CSV ({last_err})",
+                "transactions": [], "isins": {}}
+
+    cols = list(df.columns)
+    print(f"[PARSE] colonnes trouvées: {cols}", flush=True)
+
+    # ── Validate expected columns ─────────────────────────────────────────────
+    required = {"type", "asset_class", "symbol", "shares", "price",
+                "transaction_id", "name", "amount", "date"}
+    missing = required - set(cols)
+    if missing:
+        return {
+            "error": (f"Colonnes manquantes : {sorted(missing)}. "
+                      f"Colonnes présentes : {cols}"),
+            "transactions": [], "isins": {},
+        }
+
+    # ── Filter buys ───────────────────────────────────────────────────────────
+    buys = df[
+        (df["type"] == "BUY") &
+        (df["asset_class"].isin(["FUND", "STOCK"])) &
+        (df["symbol"].notna()) &
+        (df["shares"].notna()) &
+        (df["price"].notna())
+    ].copy()
+
+    if buys.empty:
+        return {"transactions": [], "isins": {}}
+
+    # ── Normalise ─────────────────────────────────────────────────────────────
+    try:
+        buys["date"] = pd.to_datetime(buys["date"]).dt.strftime("%Y-%m-%d")
+    except Exception as e:
+        return {"error": f"Format de date invalide : {e}", "transactions": [], "isins": {}}
+
+    buys["amount"] = buys["amount"].abs()
+
+    transactions, isins = [], {}
+    for _, row in buys.iterrows():
+        transactions.append({
+            "id":           str(row["transaction_id"]),
+            "date":         row["date"],
+            "account_type": str(row.get("account_type") or "PEA"),
+            "asset_class":  row["asset_class"],
+            "type":         row["type"],
+            "isin":         row["symbol"],
+            "name":         row["name"],
+            "shares":       float(row["shares"]),
+            "price":        float(row["price"]),
+            "amount":       float(row["amount"]),
+            "currency":     str(row.get("currency") or "EUR"),
+        })
+        isins[row["symbol"]] = row["name"]
+
+    print(f"[PARSE] {len(transactions)} transactions BUY extraites", flush=True)
+    return {"transactions": transactions, "isins": isins}
+
+
+# ── Per-ISIN enrichment (stateless) ───────────────────────────────────────────
+
+@app.post("/api/enrich-isin")
+def enrich_isin(body: dict):
+    """
+    Enrich a single ISIN: geo/sector data + price history from JustETF.
+    body: {isin, name, since}
+    """
+    import time
+    from enricher import (
+        _resolve_index_name, _INDEX_GEO, _INDEX_SECTORS, _fetch_justetf_prices,
     )
 
+    isin  = body.get("isin", "")
+    name  = body.get("name", isin)
+    since = body.get("since", "2020-01-01")
 
-# ─── Analytics endpoints ──────────────────────────────────────────────────────
+    print(f"\n[ENRICH] >>> {isin} ({name})", flush=True)
+    t0 = time.time()
 
-@app.get("/api/summary")
-def summary():
-    return get_summary()
+    # ── Geo / sector : fallback direct, sans appel réseau ────────────────────
+    # get_etf_overview() hang sur les ETFs synthétiques → on l'ignore.
+    # Le fallback par nom/ISIN couvre 100% de nos ETFs PEA.
+    idx = _resolve_index_name(isin, name, None)
+    if idx and idx in _INDEX_GEO:
+        geo     = dict(_INDEX_GEO[idx])
+        sectors = dict(_INDEX_SECTORS.get(idx, {}))
+        print(f"[ENRICH]   geo/sec: fallback '{idx}' ({len(geo)} pays, {len(sectors)} secteurs)", flush=True)
+    else:
+        geo, sectors = {}, {}
+        print(f"[ENRICH]   geo/sec: indice non reconnu pour '{name}'", flush=True)
 
+    # ── Price history via JustETF ─────────────────────────────────────────────
+    t1 = time.time()
+    print(f"[ENRICH]   prix: load_chart since {since}...", flush=True)
+    try:
+        price_rows = _fetch_justetf_prices(isin, since)
+        print(f"[ENRICH]   prix: {len(price_rows)} points ({time.time()-t1:.1f}s)", flush=True)
+    except Exception as e:
+        print(f"[ENRICH]   prix: ERREUR {e}", flush=True)
+        price_rows = []
 
-@app.get("/api/positions")
-def positions():
-    return get_positions()
+    print(f"[ENRICH] <<< {isin} OK en {time.time()-t0:.1f}s", flush=True)
 
-
-@app.get("/api/evolution")
-def evolution():
-    return get_portfolio_evolution()
-
-
-@app.get("/api/evolution/{isin}")
-def etf_evolution(isin: str):
-    return get_etf_evolution(isin)
-
-
-@app.get("/api/price/{isin}")
-def etf_price(isin: str, period: str = "1y"):
-    return get_etf_price_history(isin, period)
-
-
-@app.get("/api/transactions/{isin}")
-def etf_transactions(isin: str):
-    return get_etf_transactions(isin)
-
-
-@app.get("/api/performance")
-def period_performance(period: str = "ytd"):
-    return get_period_performance(period)
-
-
-@app.get("/api/metrics")
-def metrics():
-    return get_metrics()
+    return {
+        "isin": isin,
+        "metadata": {"name": name, "geo_data": geo, "sector_data": sectors},
+        "prices":   [{"date": d, "close": c} for d, c in price_rows],
+    }
 
 
-@app.get("/api/benchmark")
-def benchmark(period: str = "max"):
-    return get_benchmark_comparison(period)
+# ── Compute all analytics ──────────────────────────────────────────────────────
+
+@app.post("/api/compute")
+def compute(p: PortfolioData):
+    """
+    Main analytics endpoint. Receives the full portfolio state,
+    returns all computed metrics in one call.
+    """
+    if not p.transactions:
+        return {
+            "positions": [], "summary": {}, "evolution": [],
+            "geo": [], "sectors": [], "metrics": {}, "performance": {},
+        }
+
+    with _with_portfolio(p):
+        return {
+            "positions": get_positions(),
+            "summary":   get_summary(),
+            "evolution": get_portfolio_evolution(),
+            "geo":       get_geo_allocation(),
+            "sectors":   get_sector_allocation(),
+            "metrics":   get_metrics(),
+            "performance": {
+                "1m":  get_period_performance("1m"),
+                "mtd": get_period_performance("mtd"),
+                "ytd": get_period_performance("ytd"),
+                "max": get_period_performance("max"),
+            },
+        }
 
 
-@app.get("/api/allocation/detail")
-def allocation_detail(type: str, name: str):
-    return get_allocation_detail(type, name)
+@app.post("/api/compute/etf")
+def compute_etf(p: PortfolioData, isin: str):
+    """Per-ETF evolution + transactions (used by ETF detail modal)."""
+    with _with_portfolio(p):
+        return {
+            "evolution":    get_etf_evolution(isin),
+            "transactions": get_etf_transactions(isin),
+        }
 
 
-@app.get("/api/geo")
-def geo():
-    return get_geo_allocation()
+@app.post("/api/compute/price")
+def compute_price(p: PortfolioData, isin: str, period: str = "1y"):
+    """Price history for an ETF (used by ETF detail chart)."""
+    with _with_portfolio(p):
+        return get_etf_price_history(isin, period)
 
 
-@app.get("/api/sectors")
-def sectors():
-    return get_sector_allocation()
+@app.post("/api/compute/allocation-detail")
+def compute_alloc_detail(p: PortfolioData, type: str, name: str):
+    """Allocation breakdown for a country or sector."""
+    with _with_portfolio(p):
+        return get_allocation_detail(type, name)
+
+
+@app.post("/api/compute/benchmark")
+def compute_benchmark(p: PortfolioData, period: str = "max"):
+    """Portfolio vs S&P 500 (iShares proxy) normalized to base 100."""
+    with _with_portfolio(p):
+        return get_benchmark_comparison(period)
+
+
+@app.post("/api/compute/performance")
+def compute_performance(p: PortfolioData, period: str = "ytd"):
+    """Period performance (called when user switches period tab)."""
+    with _with_portfolio(p):
+        return get_period_performance(period)
