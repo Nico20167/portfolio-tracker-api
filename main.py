@@ -42,12 +42,17 @@ app.add_middleware(
 )
 
 FRONTEND_DIR = Path(__file__).parent / "frontend"
-app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+
+# Sert le frontend uniquement en local (pas présent sur Render)
+if FRONTEND_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 
 @app.get("/")
 def root():
-    return FileResponse(str(FRONTEND_DIR / "index.html"))
+    if FRONTEND_DIR.exists():
+        return FileResponse(str(FRONTEND_DIR / "index.html"))
+    return {"status": "ok", "api": "/docs"}
 
 
 # ── Portfolio payload model ────────────────────────────────────────────────────
