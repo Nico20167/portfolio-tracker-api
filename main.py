@@ -55,7 +55,7 @@ def root():
     return {"status": "ok", "api": "/docs"}
 
 
-@app.get("/api/ping")
+@app.api_route("/api/ping", methods=["GET", "HEAD"])
 def ping():
     return {"ok": True}
 
