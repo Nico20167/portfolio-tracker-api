@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python -c ' *)",
       "Bash(python enricher.py)",
-      "Bash(python -u enricher.py)"
+      "Bash(python -u enricher.py)",
+      "Read(//c/Users/nicom/Documents/GitHub/Portfolio-Tracker/**)"
     ]
   }
 }
