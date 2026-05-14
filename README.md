@@ -27,6 +27,7 @@ localStorage           ──POST──►   Traitement en mémoire (SQLite :mem
 
 | Méthode | Route | Description |
 |---|---|---|
+| `GET`  | `/api/ping` | Health check (keep-alive Render) |
 | `POST` | `/api/parse` | Parse un CSV Trade Republic → retourne les transactions |
 | `POST` | `/api/enrich-isin` | Géo/secteurs + historique de prix pour un ISIN via JustETF |
 | `POST` | `/api/compute` | Calcule tous les analytics (positions, évolution, répartition…) |
@@ -86,7 +87,7 @@ Le frontend doit pointer sur `http://localhost:8000/api` (détecté automatiquem
    : 'https://xxx.onrender.com/api';
    ```
 
-> **Note** : le free tier Render s'endort après 15 min d'inactivité. Le premier appel après inactivité prend ~30s (cold start). Les suivants sont instantanés.
+> **Note** : le free tier Render s'endort après 15 min d'inactivité. Le premier appel après inactivité prend ~30s (cold start). Pour éviter ça, configure un monitor sur [UptimeRobot](https://uptimerobot.com) (gratuit) pointant sur `/api/ping` toutes les 5 minutes.
 
 ---
 
@@ -94,11 +95,12 @@ Le frontend doit pointer sur `http://localhost:8000/api` (détecté automatiquem
 
 ```
 portfolio-api/
-├── main.py          # Endpoints FastAPI, logique stateless
-├── analytics.py     # Calculs : positions, TWRR, MWRR, répartition…
-├── enricher.py      # Récupération données JustETF + compositions d'indices
-├── database.py      # Utilitaire SQLite in-memory + injection de connexion
-├── parser.py        # (inutilisé en prod, conservé pour usage local)
+├── main.py                   # Endpoints FastAPI, logique stateless
+├── analytics.py              # Calculs : positions, TWRR, MWRR, répartition…
+├── enricher.py               # Récupération données JustETF + compositions d'indices
+├── etf_compositions.json     # Données de composition des indices (geo + secteurs)
+├── database.py               # Utilitaire SQLite in-memory + injection de connexion
+├── parser.py                 # (inutilisé en prod, conservé pour usage local)
 └── requirements.txt
 ```
 
@@ -106,8 +108,27 @@ portfolio-api/
 
 ## ETFs supportés
 
-Les compositions géographiques et sectorielles sont intégrées statiquement pour les indices suivants (ETFs synthétiques PEA non couverts par JustETF) :
+Les ETF **physiques** (iShares, Vanguard, Xtrackers…) sont enrichis en temps réel via JustETF : composition géographique et sectorielle exacte, cours historiques.
 
-`MSCI World` · `MSCI Emerging Markets` · `MSCI India` · `MSCI ACWI` · `MSCI Europe` · `MSCI USA` · `STOXX Europe 600` · `S&P 500` · `NASDAQ-100` · `Russell 2000` · `CAC 40` · `HSCEI China` · `Bloomberg Europe Defense`
+Les ETF **synthétiques PEA** (Amundi, BNP, Lyxor à domiciliation française) ne publient pas de composition sur JustETF. Pour eux, `enricher.py` utilise un fallback sur les compositions d'indices connues, chargées depuis **`etf_compositions.json`**.
 
-L'indice est détecté automatiquement à partir du nom de l'ETF tel qu'il apparaît dans l'export Trade Republic.
+### Indices couverts (fallback synthétiques)
+
+`MSCI World` · `MSCI Emerging Markets` · `MSCI India` · `MSCI Japan` · `MSCI Korea` · `MSCI Taiwan` · `MSCI Brazil` · `MSCI China` · `MSCI Vietnam` · `MSCI Indonesia` · `MSCI ACWI` · `MSCI USA` · `MSCI Europe` · `MSCI Europe ex-UK` · `MSCI EMU` · `MSCI Pacific ex-Japan` · `MSCI World Small Cap` · `MSCI World Quality` · `MSCI World Momentum` · `STOXX Europe 600` · `Euro Stoxx 50` · `S&P 500` · `NASDAQ-100` · `Russell 2000` · `CAC 40` · `DAX 40` · `FTSE 100` · `FTSE All-World` · `FTSE Developed World` · `Nikkei 225` · `HSCEI China` · `Bloomberg Europe Defense` · `Global Clean Energy`
+
+L'indice est détecté automatiquement à partir du nom de l'ETF tel qu'il apparaît dans l'export Trade Republic, ou via le mapping ISIN explicite dans le JSON.
+
+### Ajouter un ETF ou mettre à jour une composition
+
+Éditer uniquement **`etf_compositions.json`** — aucun changement Python requis :
+
+```json
+{
+  "geo":           { "Mon Indice": { "France": 50.0, "Germany": 50.0 } },
+  "sectors":       { "Mon Indice": { "Financials": 30.0, "Industrials": 70.0 } },
+  "isin_to_index": { "FR0012345678": "Mon Indice" },
+  "name_patterns": [ ["mon.indice", "Mon Indice"] ]
+}
+```
+
+> **Note** : les compositions sont approximatives (sources : factsheets MSCI, STOXX, FTSE, 2024-2025) et évoluent avec les rebalancements trimestriels des indices.
