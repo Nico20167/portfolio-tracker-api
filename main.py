@@ -48,6 +48,16 @@ if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 
+# ── In-memory stats counter ───────────────────────────────────────────────────
+from collections import defaultdict
+_STATS: dict[str, int] = defaultdict(int)
+
+
+@app.get("/api/stats")
+def get_stats():
+    return dict(_STATS)
+
+
 @app.get("/")
 def root():
     if FRONTEND_DIR.exists():
@@ -126,6 +136,7 @@ def _with_portfolio(p: PortfolioData):
 
 @app.post("/api/parse")
 async def parse_csv(file: UploadFile = File(...)):
+    _STATS["imports"] += 1
     """
     Parse a Trade Republic CSV (stateless — nothing stored server-side).
     Handles UTF-8, UTF-8-BOM, UTF-16 and Latin-1 encodings automatically.
@@ -205,6 +216,7 @@ async def parse_csv(file: UploadFile = File(...)):
 
 @app.post("/api/enrich-isin")
 def enrich_isin(body: dict):
+    _STATS["enrichments"] += 1
     """
     Enrich a single ISIN: geo/sector data + price history from JustETF.
     body: {isin, name, since}
@@ -256,6 +268,7 @@ def enrich_isin(body: dict):
 
 @app.post("/api/compute")
 def compute(p: PortfolioData):
+    _STATS["computes"] += 1
     """
     Main analytics endpoint. Receives the full portfolio state,
     returns all computed metrics in one call.
