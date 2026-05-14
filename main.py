@@ -55,6 +55,11 @@ def root():
     return {"status": "ok", "api": "/docs"}
 
 
+@app.get("/api/ping")
+def ping():
+    return {"ok": True}
+
+
 # ── Portfolio payload model ────────────────────────────────────────────────────
 
 class PortfolioData(BaseModel):
