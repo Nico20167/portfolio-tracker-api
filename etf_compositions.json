@@ -1,0 +1,349 @@
+{
+  "geo": {
+    "MSCI World": {
+      "United States": 70.2, "Japan": 5.8, "United Kingdom": 4.1,
+      "France": 3.1, "Canada": 3.0, "Switzerland": 2.9,
+      "Germany": 2.2, "Australia": 1.9, "Netherlands": 1.4,
+      "Sweden": 1.0, "Denmark": 0.9, "Hong Kong": 0.8,
+      "Spain": 0.7, "Italy": 0.6, "Others": 1.4
+    },
+    "MSCI Emerging Markets": {
+      "China": 27.1, "India": 18.2, "Taiwan": 17.3,
+      "South Korea": 11.8, "Brazil": 5.2, "Saudi Arabia": 4.0,
+      "South Africa": 3.1, "Mexico": 2.0, "Indonesia": 1.5,
+      "Thailand": 1.3, "Malaysia": 1.2, "Others": 7.3
+    },
+    "STOXX Europe 600": {
+      "United Kingdom": 23.2, "France": 17.1, "Switzerland": 16.0,
+      "Germany": 13.2, "Sweden": 5.9, "Netherlands": 5.4,
+      "Denmark": 4.3, "Spain": 3.2, "Italy": 3.0,
+      "Finland": 1.5, "Belgium": 1.4, "Norway": 1.3, "Others": 4.5
+    },
+    "HSCEI China": { "China": 100.0 },
+    "MSCI India":  { "India": 100.0 },
+    "MSCI Japan":  { "Japan": 100.0 },
+    "DAX 40":      { "Germany": 100.0 },
+    "FTSE 100":    { "United Kingdom": 100.0 },
+    "Nikkei 225":  { "Japan": 100.0 },
+    "MSCI Korea":  { "South Korea": 100.0 },
+    "MSCI Taiwan": { "Taiwan": 100.0 },
+    "MSCI Brazil": { "Brazil": 100.0 },
+    "Bloomberg Europe Defense": {
+      "United Kingdom": 22.0, "France": 21.0, "Germany": 14.0,
+      "Italy": 10.0, "Sweden": 9.0, "Spain": 5.0,
+      "Norway": 4.0, "Netherlands": 3.0, "Others": 12.0
+    },
+    "S&P 500":     { "United States": 100.0 },
+    "MSCI USA":    { "United States": 100.0 },
+    "NASDAQ-100":  { "United States": 96.2, "Others": 3.8 },
+    "Russell 2000":{ "United States": 100.0 },
+    "CAC 40":      { "France": 100.0 },
+    "Euro Stoxx 50": {
+      "France": 33.0, "Germany": 26.0, "Netherlands": 12.0,
+      "Spain": 11.0, "Italy": 7.0, "Belgium": 4.0,
+      "Finland": 3.0, "Others": 4.0
+    },
+    "MSCI EMU": {
+      "France": 33.0, "Germany": 24.0, "Netherlands": 12.0,
+      "Spain": 10.0, "Italy": 8.0, "Belgium": 3.0,
+      "Finland": 3.0, "Portugal": 1.0, "Others": 6.0
+    },
+    "FTSE All-World": {
+      "United States": 61.5, "Japan": 5.5, "United Kingdom": 4.0,
+      "China": 3.4, "Canada": 2.9, "India": 2.5, "France": 2.7,
+      "Switzerland": 2.5, "Germany": 2.0, "Australia": 1.8,
+      "South Korea": 1.7, "Taiwan": 1.6, "Others": 7.9
+    },
+    "FTSE Developed World": {
+      "United States": 69.0, "Japan": 6.2, "United Kingdom": 4.5,
+      "France": 3.0, "Canada": 3.0, "Switzerland": 3.0,
+      "Germany": 2.3, "Australia": 2.0, "South Korea": 1.6,
+      "Netherlands": 1.4, "Others": 4.0
+    },
+    "MSCI Europe": {
+      "United Kingdom": 25.0, "France": 18.5, "Switzerland": 15.5,
+      "Germany": 12.8, "Netherlands": 5.5, "Sweden": 5.5,
+      "Denmark": 4.0, "Spain": 3.2, "Italy": 2.8, "Others": 7.2
+    },
+    "MSCI Europe ex-UK": {
+      "France": 24.5, "Switzerland": 20.5, "Germany": 17.0,
+      "Netherlands": 7.5, "Sweden": 7.0, "Denmark": 5.5,
+      "Spain": 4.5, "Italy": 4.0, "Finland": 2.5,
+      "Belgium": 2.0, "Others": 5.0
+    },
+    "MSCI Pacific ex-Japan": {
+      "Australia": 65.0, "Hong Kong": 20.0,
+      "Singapore": 9.0, "New Zealand": 3.0, "Others": 3.0
+    },
+    "MSCI World Small Cap": {
+      "United States": 58.0, "Japan": 9.0, "United Kingdom": 5.0,
+      "Canada": 4.0, "Australia": 3.0, "Sweden": 2.5,
+      "Germany": 2.0, "Switzerland": 2.0, "Others": 14.5
+    },
+    "MSCI ACWI": {
+      "United States": 62.5, "Japan": 5.2, "United Kingdom": 3.6,
+      "China": 2.9, "France": 2.8, "Canada": 2.7, "India": 2.4,
+      "Switzerland": 2.6, "Germany": 1.9, "Taiwan": 1.7, "Others": 11.7
+    },
+    "MSCI World Quality": {
+      "United States": 73.0, "Japan": 5.0, "France": 4.0,
+      "Switzerland": 4.0, "United Kingdom": 3.5, "Germany": 2.5,
+      "Netherlands": 2.5, "Denmark": 2.0, "Others": 3.5
+    },
+    "MSCI World Momentum": {
+      "United States": 72.0, "Japan": 6.0, "United Kingdom": 4.0,
+      "France": 3.0, "Germany": 2.5, "Switzerland": 2.5,
+      "Netherlands": 2.0, "Others": 8.0
+    },
+    "Global Clean Energy": {
+      "United States": 35.0, "Denmark": 12.0, "China": 10.0,
+      "Spain": 7.0, "Germany": 6.0, "United Kingdom": 5.0,
+      "Portugal": 4.0, "Japan": 4.0, "Others": 17.0
+    },
+    "MSCI China": { "China": 100.0 },
+    "MSCI Vietnam": { "Vietnam": 100.0 },
+    "MSCI Indonesia": { "Indonesia": 100.0 }
+  },
+
+  "sectors": {
+    "MSCI World": {
+      "Information Technology": 22.4, "Financials": 16.2,
+      "Health Care": 11.8, "Consumer Discretionary": 10.8,
+      "Industrials": 10.4, "Communication Services": 8.1,
+      "Consumer Staples": 6.9, "Energy": 4.7,
+      "Materials": 3.8, "Utilities": 2.7, "Real Estate": 2.2
+    },
+    "MSCI Emerging Markets": {
+      "Financials": 21.3, "Information Technology": 20.5,
+      "Consumer Discretionary": 12.1, "Communication Services": 10.2,
+      "Materials": 8.0, "Energy": 6.8, "Industrials": 6.2,
+      "Consumer Staples": 4.5, "Health Care": 4.3,
+      "Utilities": 3.5, "Real Estate": 2.6
+    },
+    "STOXX Europe 600": {
+      "Financials": 18.2, "Industrials": 15.1, "Health Care": 13.8,
+      "Consumer Discretionary": 10.3, "Consumer Staples": 9.2,
+      "Information Technology": 8.5, "Materials": 7.1,
+      "Energy": 6.0, "Communication Services": 4.9,
+      "Utilities": 4.0, "Real Estate": 2.9
+    },
+    "HSCEI China": {
+      "Financials": 33.0, "Consumer Discretionary": 20.0,
+      "Information Technology": 15.0, "Real Estate": 8.0,
+      "Industrials": 8.0, "Energy": 7.0,
+      "Health Care": 5.0, "Others": 4.0
+    },
+    "MSCI India": {
+      "Financials": 25.0, "Information Technology": 22.0,
+      "Consumer Discretionary": 10.0, "Materials": 8.0,
+      "Industrials": 7.0, "Energy": 7.0, "Health Care": 7.0,
+      "Consumer Staples": 5.0, "Communication Services": 4.0,
+      "Utilities": 3.0, "Real Estate": 2.0
+    },
+    "MSCI Japan": {
+      "Industrials": 22.0, "Consumer Discretionary": 19.0,
+      "Information Technology": 15.0, "Financials": 13.0,
+      "Health Care": 8.0, "Materials": 8.0, "Consumer Staples": 7.0,
+      "Communication Services": 4.0, "Energy": 2.0, "Utilities": 2.0
+    },
+    "DAX 40": {
+      "Information Technology": 16.0, "Health Care": 13.0,
+      "Financials": 13.0, "Consumer Discretionary": 12.0,
+      "Industrials": 11.0, "Materials": 9.0, "Consumer Staples": 8.0,
+      "Energy": 7.0, "Communication Services": 6.0, "Utilities": 5.0
+    },
+    "FTSE 100": {
+      "Financials": 19.0, "Consumer Staples": 17.0, "Energy": 13.0,
+      "Industrials": 11.0, "Health Care": 10.0, "Materials": 10.0,
+      "Consumer Discretionary": 7.0, "Communication Services": 5.0,
+      "Utilities": 4.0, "Real Estate": 2.0, "Information Technology": 2.0
+    },
+    "Nikkei 225": {
+      "Industrials": 23.0, "Consumer Discretionary": 20.0,
+      "Information Technology": 14.0, "Financials": 12.0,
+      "Materials": 9.0, "Health Care": 7.0, "Consumer Staples": 7.0,
+      "Communication Services": 4.0, "Energy": 2.0, "Utilities": 2.0
+    },
+    "Bloomberg Europe Defense": {
+      "Industrials": 82.0, "Information Technology": 12.0,
+      "Materials": 4.0, "Energy": 2.0
+    },
+    "S&P 500": {
+      "Information Technology": 31.5, "Financials": 13.5,
+      "Health Care": 11.5, "Consumer Discretionary": 10.5,
+      "Industrials": 8.5, "Communication Services": 8.5,
+      "Consumer Staples": 6.0, "Energy": 3.8,
+      "Materials": 2.5, "Utilities": 2.5, "Real Estate": 1.2
+    },
+    "MSCI USA": {
+      "Information Technology": 31.5, "Financials": 13.5,
+      "Health Care": 11.5, "Consumer Discretionary": 10.5,
+      "Industrials": 8.5, "Communication Services": 8.5,
+      "Consumer Staples": 6.0, "Energy": 3.8,
+      "Materials": 2.5, "Utilities": 2.5, "Real Estate": 1.2
+    },
+    "NASDAQ-100": {
+      "Information Technology": 52.0, "Communication Services": 17.0,
+      "Consumer Discretionary": 14.0, "Health Care": 6.5,
+      "Industrials": 4.5, "Financials": 2.5, "Others": 3.5
+    },
+    "Russell 2000": {
+      "Financials": 22.0, "Industrials": 18.5, "Health Care": 16.5,
+      "Consumer Discretionary": 10.5, "Information Technology": 10.0,
+      "Real Estate": 7.5, "Materials": 4.0, "Energy": 3.5,
+      "Consumer Staples": 3.5, "Utilities": 2.5, "Communication Services": 1.5
+    },
+    "CAC 40": {
+      "Consumer Discretionary": 18.0, "Industrials": 17.0,
+      "Financials": 13.5, "Materials": 10.5, "Health Care": 10.0,
+      "Information Technology": 8.5, "Energy": 7.5,
+      "Consumer Staples": 7.0, "Communication Services": 5.0,
+      "Utilities": 3.0
+    },
+    "Euro Stoxx 50": {
+      "Financials": 18.0, "Consumer Discretionary": 17.0,
+      "Industrials": 14.0, "Health Care": 13.0, "Consumer Staples": 9.0,
+      "Information Technology": 8.0, "Energy": 7.0,
+      "Materials": 6.0, "Communication Services": 5.0, "Utilities": 3.0
+    },
+    "MSCI EMU": {
+      "Financials": 20.0, "Industrials": 16.0,
+      "Consumer Discretionary": 12.0, "Health Care": 11.0,
+      "Consumer Staples": 9.0, "Information Technology": 8.0,
+      "Energy": 6.0, "Materials": 7.0, "Communication Services": 5.0,
+      "Utilities": 4.0, "Real Estate": 2.0
+    },
+    "FTSE All-World": {
+      "Information Technology": 22.0, "Financials": 16.0,
+      "Health Care": 11.0, "Consumer Discretionary": 11.0,
+      "Industrials": 10.0, "Communication Services": 8.0,
+      "Consumer Staples": 7.0, "Energy": 4.0,
+      "Materials": 4.0, "Utilities": 3.0, "Real Estate": 2.0, "Others": 2.0
+    },
+    "FTSE Developed World": {
+      "Information Technology": 23.0, "Financials": 15.5,
+      "Health Care": 12.0, "Consumer Discretionary": 11.0,
+      "Industrials": 10.5, "Communication Services": 8.0,
+      "Consumer Staples": 7.0, "Energy": 4.5,
+      "Materials": 4.0, "Utilities": 2.5, "Real Estate": 2.0
+    },
+    "MSCI Europe": {
+      "Financials": 18.5, "Industrials": 15.8, "Health Care": 15.2,
+      "Consumer Staples": 10.5, "Consumer Discretionary": 10.0,
+      "Materials": 7.5, "Energy": 6.2, "Information Technology": 6.0,
+      "Communication Services": 4.8, "Utilities": 3.5, "Real Estate": 2.0
+    },
+    "MSCI Europe ex-UK": {
+      "Health Care": 16.0, "Industrials": 16.0, "Financials": 16.0,
+      "Consumer Staples": 10.0, "Consumer Discretionary": 10.0,
+      "Materials": 8.0, "Information Technology": 7.0,
+      "Energy": 5.5, "Communication Services": 5.0,
+      "Utilities": 4.0, "Real Estate": 2.5
+    },
+    "MSCI Pacific ex-Japan": {
+      "Financials": 33.0, "Materials": 17.0, "Real Estate": 10.0,
+      "Consumer Staples": 8.0, "Industrials": 7.0,
+      "Health Care": 7.0, "Energy": 6.0, "Information Technology": 5.0,
+      "Communication Services": 4.0, "Utilities": 3.0
+    },
+    "MSCI World Small Cap": {
+      "Industrials": 19.0, "Financials": 17.0,
+      "Consumer Discretionary": 14.0, "Health Care": 13.0,
+      "Information Technology": 12.0, "Real Estate": 7.0,
+      "Materials": 6.0, "Consumer Staples": 4.0,
+      "Energy": 3.0, "Utilities": 3.0, "Communication Services": 2.0
+    },
+    "MSCI ACWI": {
+      "Information Technology": 23.5, "Financials": 15.8,
+      "Health Care": 11.5, "Consumer Discretionary": 10.5,
+      "Industrials": 10.3, "Communication Services": 7.8,
+      "Consumer Staples": 6.5, "Energy": 4.5,
+      "Materials": 4.0, "Utilities": 2.8, "Real Estate": 2.8
+    },
+    "MSCI World Quality": {
+      "Information Technology": 28.0, "Financials": 17.0,
+      "Health Care": 14.0, "Consumer Discretionary": 11.0,
+      "Industrials": 9.0, "Communication Services": 8.0,
+      "Consumer Staples": 7.0, "Energy": 2.0,
+      "Materials": 2.0, "Utilities": 1.0, "Real Estate": 1.0
+    },
+    "MSCI World Momentum": {
+      "Information Technology": 35.0, "Financials": 15.0,
+      "Health Care": 12.0, "Consumer Discretionary": 10.0,
+      "Industrials": 9.0, "Communication Services": 8.0,
+      "Consumer Staples": 5.0, "Energy": 3.0,
+      "Materials": 2.0, "Utilities": 1.0
+    },
+    "Global Clean Energy": {
+      "Utilities": 52.0, "Industrials": 28.0,
+      "Information Technology": 10.0, "Materials": 6.0, "Others": 4.0
+    },
+    "MSCI China": {
+      "Consumer Discretionary": 25.0, "Financials": 20.0,
+      "Communication Services": 18.0, "Information Technology": 14.0,
+      "Industrials": 8.0, "Health Care": 5.0,
+      "Consumer Staples": 4.0, "Energy": 3.0, "Others": 3.0
+    }
+  },
+
+  "isin_to_index": {
+    "FR0011871078": "HSCEI China",
+    "FR0011869320": "MSCI India",
+    "LU3047998896": "Bloomberg Europe Defense",
+    "FR0011871110": "NASDAQ-100",
+    "FR0010959676": "MSCI Emerging Markets",
+    "FR0013412285": "S&P 500",
+    "FR0010791004": "STOXX Europe 600",
+    "FR0007496220": "CAC 40",
+    "FR0011871137": "Euro Stoxx 50",
+    "FR0011869195": "MSCI Europe",
+    "FR0011871145": "MSCI EMU",
+    "FR0011871152": "MSCI Japan",
+    "FR0011871160": "Russell 2000",
+    "LU1931974691": "MSCI World",
+    "IE00B4L5Y983": "MSCI World",
+    "IE00B3RBWM25": "FTSE All-World",
+    "IE00BKM4GZ66": "MSCI Emerging Markets",
+    "IE00B5BMR087": "S&P 500",
+    "IE0032077012": "NASDAQ-100",
+    "IE00BJ0KDQ92": "MSCI World",
+    "IE00B4K48X80": "MSCI Europe",
+    "IE00B6YX5C33": "S&P 500"
+  },
+
+  "name_patterns": [
+    ["hscei|hang\\s+seng\\s+china",          "HSCEI China"],
+    ["msci\\s+india\\b",                      "MSCI India"],
+    ["msci\\s+japan\\b",                      "MSCI Japan"],
+    ["msci\\s+korea\\b",                      "MSCI Korea"],
+    ["msci\\s+taiwan\\b",                     "MSCI Taiwan"],
+    ["msci\\s+brazil\\b",                     "MSCI Brazil"],
+    ["msci\\s+china\\b",                      "MSCI China"],
+    ["msci\\s+vietnam\\b",                    "MSCI Vietnam"],
+    ["msci\\s+indonesia\\b",                  "MSCI Indonesia"],
+    ["defense|defence",                       "Bloomberg Europe Defense"],
+    ["euro\\s+stoxx\\s+50\\b",               "Euro Stoxx 50"],
+    ["stoxx\\s+europe\\s+600",               "STOXX Europe 600"],
+    ["msci\\s+emu|msci\\s+eurozone",         "MSCI EMU"],
+    ["msci\\s+europe\\s+ex",                 "MSCI Europe ex-UK"],
+    ["msci\\s+europe\\b",                    "MSCI Europe"],
+    ["msci\\s+pacific\\s+ex",               "MSCI Pacific ex-Japan"],
+    ["msci\\s+world\\s+small",              "MSCI World Small Cap"],
+    ["msci\\s+world\\s+quality",            "MSCI World Quality"],
+    ["msci\\s+world\\s+momentum",           "MSCI World Momentum"],
+    ["msci\\s+world",                        "MSCI World"],
+    ["msci\\s+em|emerging\\s+market",       "MSCI Emerging Markets"],
+    ["msci\\s+acwi|all\\s+countr",          "MSCI ACWI"],
+    ["msci\\s+usa\\b",                       "MSCI USA"],
+    ["ftse\\s+all.world|all\\s+world",      "FTSE All-World"],
+    ["ftse\\s+developed",                    "FTSE Developed World"],
+    ["ftse\\s+100\\b",                       "FTSE 100"],
+    ["s[&\\s]*p\\s*500|sp500",              "S&P 500"],
+    ["nasdaq.?100",                          "NASDAQ-100"],
+    ["russell\\s*2000",                      "Russell 2000"],
+    ["cac\\s*40",                            "CAC 40"],
+    ["dax\\s*40|\\bdax\\b",                 "DAX 40"],
+    ["nikkei",                               "Nikkei 225"],
+    ["clean\\s+energy",                      "Global Clean Energy"]
+  ]
+}

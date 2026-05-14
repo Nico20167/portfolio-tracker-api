@@ -4,182 +4,33 @@ Enricher — fetches ETF data:
   - price history via justetf_scraping.load_chart(isin)
 
 Synthetic ETFs (swap-based) have no composition on JustETF.
-Fallback uses the replicated index composition (MSCI World, STOXX Europe 600, etc.)
+Fallback uses the replicated index composition loaded from etf_compositions.json.
+To add or update an ETF/index, edit etf_compositions.json — no Python change needed.
 """
 
 import json
 import re
 import time
 from datetime import date
+from pathlib import Path
 
 from database import get_conn
 
 
-# ── Known index compositions (approximate weights, 2024-2025) ─────────────────
-# Sources: MSCI, STOXX, S&P index factsheets
-
-_INDEX_GEO: dict[str, dict[str, float]] = {
-    "MSCI World": {
-        "United States": 70.2, "Japan": 5.8, "United Kingdom": 4.1,
-        "France": 3.1, "Canada": 3.0, "Switzerland": 2.9,
-        "Germany": 2.2, "Australia": 1.9, "Netherlands": 1.4,
-        "Sweden": 1.0, "Denmark": 0.9, "Hong Kong": 0.8,
-        "Spain": 0.7, "Italy": 0.6, "Others": 1.4,
-    },
-    "MSCI Emerging Markets": {
-        "China": 27.1, "India": 18.2, "Taiwan": 17.3,
-        "South Korea": 11.8, "Brazil": 5.2, "Saudi Arabia": 4.0,
-        "South Africa": 3.1, "Mexico": 2.0, "Indonesia": 1.5,
-        "Thailand": 1.3, "Malaysia": 1.2, "Others": 7.3,
-    },
-    "STOXX Europe 600": {
-        "United Kingdom": 23.2, "France": 17.1, "Switzerland": 16.0,
-        "Germany": 13.2, "Sweden": 5.9, "Netherlands": 5.4,
-        "Denmark": 4.3, "Spain": 3.2, "Italy": 3.0,
-        "Finland": 1.5, "Belgium": 1.4, "Norway": 1.3, "Others": 4.5,
-    },
-    "HSCEI China": {
-        "China": 100.0,
-    },
-    "MSCI India": {
-        "India": 100.0,
-    },
-    "Bloomberg Europe Defense": {
-        "United Kingdom": 22.0, "France": 21.0, "Germany": 14.0,
-        "Italy": 10.0, "Sweden": 9.0, "Spain": 5.0,
-        "Norway": 4.0, "Netherlands": 3.0, "Others": 12.0,
-    },
-    "S&P 500": {"United States": 100.0},
-    "MSCI USA": {"United States": 100.0},
-    "NASDAQ-100": {"United States": 96.2, "Others": 3.8},
-    "MSCI Europe": {
-        "United Kingdom": 25.0, "France": 18.5, "Switzerland": 15.5,
-        "Germany": 12.8, "Netherlands": 5.5, "Sweden": 5.5,
-        "Denmark": 4.0, "Spain": 3.2, "Italy": 2.8, "Others": 7.2,
-    },
-    "CAC 40": {"France": 100.0},
-    "Russell 2000": {"United States": 100.0},
-    "MSCI ACWI": {
-        "United States": 62.5, "Japan": 5.2, "United Kingdom": 3.6,
-        "China": 2.9, "France": 2.8, "Canada": 2.7, "India": 2.4,
-        "Switzerland": 2.6, "Germany": 1.9, "Taiwan": 1.7, "Others": 11.7,
-    },
-}
-
-_INDEX_SECTORS: dict[str, dict[str, float]] = {
-    "MSCI World": {
-        "Information Technology": 22.4, "Financials": 16.2,
-        "Health Care": 11.8, "Consumer Discretionary": 10.8,
-        "Industrials": 10.4, "Communication Services": 8.1,
-        "Consumer Staples": 6.9, "Energy": 4.7,
-        "Materials": 3.8, "Utilities": 2.7, "Real Estate": 2.2,
-    },
-    "MSCI Emerging Markets": {
-        "Financials": 21.3, "Information Technology": 20.5,
-        "Consumer Discretionary": 12.1, "Communication Services": 10.2,
-        "Materials": 8.0, "Energy": 6.8, "Industrials": 6.2,
-        "Consumer Staples": 4.5, "Health Care": 4.3,
-        "Utilities": 3.5, "Real Estate": 2.6,
-    },
-    "STOXX Europe 600": {
-        "Financials": 18.2, "Industrials": 15.1, "Health Care": 13.8,
-        "Consumer Discretionary": 10.3, "Consumer Staples": 9.2,
-        "Information Technology": 8.5, "Materials": 7.1,
-        "Energy": 6.0, "Communication Services": 4.9,
-        "Utilities": 4.0, "Real Estate": 2.9,
-    },
-    "HSCEI China": {
-        "Financials": 33.0, "Consumer Discretionary": 20.0,
-        "Information Technology": 15.0, "Real Estate": 8.0,
-        "Industrials": 8.0, "Energy": 7.0,
-        "Health Care": 5.0, "Others": 4.0,
-    },
-    "MSCI India": {
-        "Financials": 25.0, "Information Technology": 22.0,
-        "Consumer Discretionary": 10.0, "Materials": 8.0,
-        "Industrials": 7.0, "Energy": 7.0, "Health Care": 7.0,
-        "Consumer Staples": 5.0, "Communication Services": 4.0,
-        "Utilities": 3.0, "Real Estate": 2.0,
-    },
-    "Bloomberg Europe Defense": {
-        "Industrials": 82.0, "Information Technology": 12.0,
-        "Materials": 4.0, "Energy": 2.0,
-    },
-    "S&P 500": {
-        "Information Technology": 31.5, "Financials": 13.5,
-        "Health Care": 11.5, "Consumer Discretionary": 10.5,
-        "Industrials": 8.5, "Communication Services": 8.5,
-        "Consumer Staples": 6.0, "Energy": 3.8,
-        "Materials": 2.5, "Utilities": 2.5, "Real Estate": 1.2,
-    },
-    "MSCI USA": {
-        "Information Technology": 31.5, "Financials": 13.5,
-        "Health Care": 11.5, "Consumer Discretionary": 10.5,
-        "Industrials": 8.5, "Communication Services": 8.5,
-        "Consumer Staples": 6.0, "Energy": 3.8,
-        "Materials": 2.5, "Utilities": 2.5, "Real Estate": 1.2,
-    },
-    "NASDAQ-100": {
-        "Information Technology": 52.0, "Communication Services": 17.0,
-        "Consumer Discretionary": 14.0, "Health Care": 6.5,
-        "Industrials": 4.5, "Financials": 2.5, "Others": 3.5,
-    },
-    "MSCI Europe": {
-        "Financials": 18.5, "Industrials": 15.8, "Health Care": 15.2,
-        "Consumer Staples": 10.5, "Consumer Discretionary": 10.0,
-        "Materials": 7.5, "Energy": 6.2, "Information Technology": 6.0,
-        "Communication Services": 4.8, "Utilities": 3.5, "Real Estate": 2.0,
-    },
-    "MSCI ACWI": {
-        "Information Technology": 23.5, "Financials": 15.8,
-        "Health Care": 11.5, "Consumer Discretionary": 10.5,
-        "Industrials": 10.3, "Communication Services": 7.8,
-        "Consumer Staples": 6.5, "Energy": 4.5,
-        "Materials": 4.0, "Utilities": 2.8, "Real Estate": 2.8,
-    },
-    "CAC 40": {
-        "Consumer Discretionary": 18.0, "Industrials": 17.0,
-        "Financials": 13.5, "Materials": 10.5, "Health Care": 10.0,
-        "Information Technology": 8.5, "Energy": 7.5,
-        "Consumer Staples": 7.0, "Communication Services": 5.0,
-        "Utilities": 3.0,
-    },
-    "Russell 2000": {
-        "Financials": 22.0, "Industrials": 18.5, "Health Care": 16.5,
-        "Consumer Discretionary": 10.5, "Information Technology": 10.0,
-        "Real Estate": 7.5, "Materials": 4.0, "Energy": 3.5,
-        "Consumer Staples": 3.5, "Utilities": 2.5, "Communication Services": 1.5,
-    },
-}
-
-
-# ── ISIN → index mapping for known PEA synthetic ETFs ────────────────────────
-# Fallback de dernier recours si la détection par nom échoue.
-# La détection par nom ETF (Trade Republic) couvre déjà la majorité des cas.
-ISIN_TO_INDEX: dict[str, str] = {
-    "FR0011871078": "HSCEI China",           # PEA HSCEI China EUR (Acc)
-    "FR0011869320": "MSCI India",            # PEA MSCI India EUR (Acc)
-    "LU3047998896": "Bloomberg Europe Defense",  # Easy Bloomberg Europe Defense EUR
-}
-
-
-# ── Index name detection from ETF name string ─────────────────────────────────
-_NAME_PATTERNS: list[tuple[re.Pattern, str]] = [
-    # Order matters: more specific patterns first
-    (re.compile(r"hscei|hang\s+seng\s+china",    re.I), "HSCEI China"),
-    (re.compile(r"msci\s+india\b",               re.I), "MSCI India"),
-    (re.compile(r"defense|defence",              re.I), "Bloomberg Europe Defense"),
-    (re.compile(r"msci\s+world",                 re.I), "MSCI World"),
-    (re.compile(r"msci\s+em|emerging\s+market",  re.I), "MSCI Emerging Markets"),
-    (re.compile(r"stoxx\s+europe\s+600",         re.I), "STOXX Europe 600"),
-    (re.compile(r"s[&\s]*p\s*500|sp500",         re.I), "S&P 500"),
-    (re.compile(r"nasdaq.?100",                  re.I), "NASDAQ-100"),
-    (re.compile(r"msci\s+europe\b",              re.I), "MSCI Europe"),
-    (re.compile(r"msci\s+usa\b",                 re.I), "MSCI USA"),
-    (re.compile(r"cac\s*40",                     re.I), "CAC 40"),
-    (re.compile(r"russell\s*2000",               re.I), "Russell 2000"),
-    (re.compile(r"msci\s+acwi|all\s+countr",     re.I), "MSCI ACWI"),
-]
+# ── Load compositions from JSON (geo, sectors, isin→index, name patterns) ─────
+_DATA_FILE = Path(__file__).parent / "etf_compositions.json"
+try:
+    with open(_DATA_FILE, encoding="utf-8") as _f:
+        _data = json.load(_f)
+    _INDEX_GEO: dict[str, dict[str, float]]     = _data["geo"]
+    _INDEX_SECTORS: dict[str, dict[str, float]] = _data["sectors"]
+    ISIN_TO_INDEX: dict[str, str]               = _data["isin_to_index"]
+    _NAME_PATTERNS: list[tuple[re.Pattern, str]] = [
+        (re.compile(p, re.I), idx) for p, idx in _data["name_patterns"]
+    ]
+except FileNotFoundError:
+    print(f"[ENRICHER] WARN: {_DATA_FILE} introuvable — compositions vides.")
+    _INDEX_GEO, _INDEX_SECTORS, ISIN_TO_INDEX, _NAME_PATTERNS = {}, {}, {}, []
 
 
 def _detect_index(text: str) -> str | None:
