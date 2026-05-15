@@ -5,6 +5,9 @@
       "Bash(python enricher.py)",
       "Bash(python -u enricher.py)",
       "Read(//c/Users/nicom/Documents/GitHub/Portfolio-Tracker/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\nicom\\Documents\\GitHub\\Portfolio-Tracker"
     ]
   }
 }
